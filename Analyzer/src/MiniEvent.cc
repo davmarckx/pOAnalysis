@@ -33,6 +33,7 @@ void createMiniEventTree(TTree *t,MiniEvent_t &ev)
 
   t->Branch("gen_ntrk",        &ev.gen_ntrk,          "gen_ntrk/I");
   t->Branch("gen_trk_pt",        ev.gen_trk_pt,         "gen_trk_pt[gen_ntrk]/F");
+  t->Branch("gen_trk_p",        ev.gen_trk_p,         "gen_trk_p[gen_ntrk]/F");
   t->Branch("gen_trk_id",       ev.gen_trk_id,        "gen_trk_id[gen_ntrk]/I");
   t->Branch("gen_trk_eta",      ev.gen_trk_eta,       "gen_trk_eta[gen_ntrk]/F");
   t->Branch("gen_trk_hasReco",    ev.gen_trk_hasReco,     "gen_trk_hasReco[gen_ntrk]/I");
@@ -70,6 +71,7 @@ void attachToMiniEventTree(TTree *t,MiniEvent_t &ev)
 
   t->SetBranchAddress("gen_ntrk",        &ev.gen_ntrk);
   t->SetBranchAddress("gen_trk_pt", ev.gen_trk_pt);
+  t->SetBranchAddress("gen_trk_p", ev.gen_trk_p);
   t->SetBranchAddress("gen_trk_eta",     ev.gen_trk_eta);
   t->SetBranchAddress("gen_trk_hasReco",        &ev.gen_trk_hasReco);
   t->SetBranchAddress("gen_trk_id", ev.gen_trk_id);

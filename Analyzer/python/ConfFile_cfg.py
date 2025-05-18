@@ -12,6 +12,11 @@ options.register('applyFilt', True,
                  VarParsing.varType.bool,
                  'Apply filters'
                  )
+options.register('name', "",
+                 VarParsing.multiplicity.singleton,
+                 VarParsing.varType.string,
+                 'name of output (used to run multiple processes at the same time in the same temp directory. Works better in T2B)'
+                 )
 options.parseArguments()
 
 from Configuration.StandardSequences.Eras import eras
@@ -26,9 +31,13 @@ process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cf
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = cms.untracked.string('ERROR')
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+#process.MessageLogger = cms.Service("MessageLogger",
+#    destinations = cms.untracked.vstring('cout'),
+#    cout = cms.untracked.PSet(threshold = cms.untracked.string('DEBUG'))
+#)
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(options.maxEvents)
+    input = cms.untracked.int32(3000000)
 )
 
 
@@ -50,7 +59,7 @@ if options.lumiJson:
 else: process.GlobalTag.globaltag = "141X_mcRun3_2024_realistic_HI_v13"
 
 process.TFileService = cms.Service("TFileService",
-                    fileName = cms.string('output.root')
+                    fileName = cms.string('OUTPUT/output_{}.root'.format(options.name))
 					)
 					
 process.analysis = cms.EDAnalyzer('Analyzer',

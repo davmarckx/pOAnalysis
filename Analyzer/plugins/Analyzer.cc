@@ -145,7 +145,6 @@ Analyzer::~Analyzer() {
 // ------------ method called for each event  ------------
 void Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   using namespace edm;
-  std::cout<<"new event";
   
   h_counter->Fill(1,1);
   
@@ -195,7 +194,7 @@ void Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) 
     std::cerr << "Error: packedGenParticles collection is invalid" << std::endl;
   }
   if (genParticles->empty()) {
-    std::cerr << "Error: packedGenParticles collection is empty" << std::endl;
+    std::cout << "Warning: packedGenParticles collection is empty" << std::endl;
   }
  
   ev_.ntrk = 0;
@@ -320,6 +319,7 @@ void Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) 
 
           // write gen info
 	  ev_.gen_trk_pt[ev_.gen_ntrk] = p.pt();
+          ev_.gen_trk_p[ev_.gen_ntrk] = p.p();
           ev_.gen_trk_eta[ev_.gen_ntrk] = p.eta();
 	  ev_.gen_trk_id[ev_.gen_ntrk] = p.pdgId(); 
 

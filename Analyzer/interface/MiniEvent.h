@@ -35,7 +35,7 @@ struct MiniEvent_t
   //gen track info
   Int_t gen_ntrk;
   Int_t gen_trk_hasReco[MAXGENTRACKS];
-  Float_t gen_trk_pt[MAXGENTRACKS], gen_trk_eta[MAXGENTRACKS];
+  Float_t gen_trk_pt[MAXGENTRACKS], gen_trk_p[MAXGENTRACKS], gen_trk_eta[MAXGENTRACKS];
   Int_t gen_trk_id[MAXGENTRACKS];
   
   
