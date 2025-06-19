@@ -25,7 +25,8 @@ struct MiniEvent_t
 
   //track info
   Int_t ntrk, trk_nMeasure[MAXTRACKS], trk_nSaturMeasure[MAXTRACKS], trk_nMeasureLayer[MAXTRACKS];
-  Int_t trk_q[MAXTRACKS], trk_isPi[MAXTRACKS], trk_isK[MAXTRACKS], trk_isP[MAXTRACKS];
+  Int_t trk_q[MAXTRACKS], trk_isPi[MAXTRACKS], trk_isK[MAXTRACKS], trk_isP[MAXTRACKS],trk_isPi_loose[MAXTRACKS], trk_isK_loose[MAXTRACKS], trk_isP_loose[MAXTRACKS], trk_isPi_binned[MAXTRACKS], trk_isK_binned[MAXTRACKS], trk_isP_binned[MAXTRACKS];
+  Int_t trk_hasPF[MAXTRACKS];
   Float_t trk_p[MAXTRACKS], trk_pt[MAXTRACKS], trk_eta[MAXTRACKS], trk_phi[MAXTRACKS], trk_dedx[MAXTRACKS], trk_dedxerr[MAXTRACKS];
 
   //extra track info
@@ -35,7 +36,7 @@ struct MiniEvent_t
   //gen track info
   Int_t gen_ntrk;
   Int_t gen_trk_hasReco[MAXGENTRACKS];
-  Float_t gen_trk_pt[MAXGENTRACKS], gen_trk_p[MAXGENTRACKS], gen_trk_eta[MAXGENTRACKS];
+  Float_t gen_trk_pt[MAXGENTRACKS], gen_trk_p[MAXGENTRACKS],gen_trk_E[MAXGENTRACKS], gen_trk_eta[MAXGENTRACKS];
   Int_t gen_trk_id[MAXGENTRACKS];
   
   
