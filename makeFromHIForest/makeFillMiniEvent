@@ -1,0 +1,12 @@
+CC=g++ -Wall -Wextra -O3
+CFLAGS= -Wl,--no-as-needed,-lTMVA
+LDFLAGS=`root-config --glibs --cflags`
+SOURCES= fillMiniEvent.cc src/MiniEvent.cc src/HIFEvent.cc src/HIFEvent_gen.cc
+OBJECTS=$(SOURCES:.cc=.o)
+EXECUTABLE=fillMiniEvent
+
+all: 
+	$(CC) $(CFLAGS) $(SOURCES) $(LDFLAGS) -o $(EXECUTABLE)
+        
+clean:
+	rm -rf *o $(EXECUTABLE)

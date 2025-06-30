@@ -492,10 +492,10 @@ void Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) 
 
 	  auto const& p = genParticles->at(i);
 
-          //if(p.eta()<-2.5 || p.eta()>2.5) continue;
+          if(p.eta()<-2.5 || p.eta()>2.5) continue;
 
 
-	  //if(p.charge()==0) continue;
+	  if(p.charge()==0) continue;
           if (p.status() != 1) continue;
 
           // write gen info

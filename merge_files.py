@@ -12,7 +12,7 @@ files = set([''.join([i for i in f.split("/")[-1] if not i.isdigit()]) for f in 
 print(files)
 
 for generator in files:
-  if not "dpm" in generator: continue
+  #if not "dpm" in generator: continue
   if os.path.exists(os.path.join(input_dir,generator)):
     os.system('rm {}'.format(os.path.join(input_dir,generator)) )
   os.system('hadd {} {}'.format(os.path.join(input_dir,generator), os.path.join(input_dir,generator).replace(".root","*")))

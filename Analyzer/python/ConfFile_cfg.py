@@ -59,7 +59,7 @@ if options.lumiJson:
 else: process.GlobalTag.globaltag = "141X_mcRun3_2024_realistic_HI_v13"
 
 process.TFileService = cms.Service("TFileService",
-                    fileName = cms.string('OUTPUT/output_{}.root'.format(options.name))
+                    fileName = cms.string('OUTPUT/outputZDC_{}.root'.format(options.name))
 					)
 					
 process.analysis = cms.EDAnalyzer('Analyzer',
