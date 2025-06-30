@@ -224,30 +224,47 @@ def makeJobDescription(name, exe, argstring=None,
 
 #settings for each year, found with gridsearch
 input_dir = sys.argv[1].rstrip('/')
-runmode = "condor"
+
+runmode = "local"
+
+fromHIForest = True
 
 
+files = glob.glob(input_dir + "/*.root")
+
+if not fromHIForest:
+    files = ["file:" + f for f in files]
 
 
-files = glob.glob(input_dir + "/miniAOD*.root")
-
-files = ["file:" + f for f in files]
-#files = ",".join(files)
 splits = int(len(files)/50)
 print(len(files))
+
+
 cmds = []
-for i in range(0,splits):
+if not fromHIForest:
+ for i in range(0,splits):
   subfiles = files[i*50:i*50+49]
   if i == splits-1:
     subfiles = files[i*50:]
-  cmd = "cmsRun /user/dmarckx/PO/CMSSW_15_0_0_pre2/src/pOAnalysis/Analyzer/python/ConfFile_cfg.py inputFiles={} applyFilt=False name={}".format(",".join(subfiles),input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1]+str(i))
-  cmds.append(cmd)
-  if os.path.exists("OUTPUT/output_{}".format(input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1]+str(i))):
-    os.system("rm OUTPUT/output_{}".format(input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1]+str(i)))
+
+    cmd = "cmsRun /user/dmarckx/PO/CMSSW_15_0_0_pre2/src/pOAnalysis/Analyzer/python/ConfFile_cfg.py inputFiles={} applyFilt=False name={}".format(",".join(subfiles),input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1]+str(i))
+    cmds.append(cmd)
+    if os.path.exists("OUTPUT/output_{}".format(input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1] + str(i))):
+          os.system("rm OUTPUT/output_{}".format(input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1] + str(i)))
+
+else:
+    for i, file in enumerate(files):
+        print(file)
+        cmd = "./makeFromHIForest/fillMiniEvent {} {}".format(file, input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1] + "_HIF" + str(i))
+        cmds.append(cmd)
+
+        if os.path.exists("OUTPUT/output_{}".format(input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1] + "_HIF" + str(i))):
+          os.system("rm OUTPUT/output_{}".format(input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1] + "_HIF" + str(i)))
 
 
 if runmode == "local":
   for cmd in cmds:
+    print(cmd)
     os.system(cmd)
 
 else:

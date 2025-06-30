@@ -4,6 +4,8 @@
 
 #include "TTree.h"
 #include "TFile.h"
+#include "TDirectory.h"
+
 #include "TH1.h"
 #include "TH2D.h"
 #include <cmath>
@@ -140,6 +142,10 @@ int main( int argc, char* argv[] ){
 
 
     // make output tree
+    std::string outputfile = "/user/dmarckx/PO/CMSSW_15_0_0_pre2/src/pOAnalysis/OUTPUT/output_" + outputname +".root";
+
+    TFile of(outputfile.c_str(), "recreate");
+    TDirectory *dir = of.mkdir("analysis");
     TTree *tree_ = new TTree("tree","tree");
     //tree_->SetDirectory(0);
     //tree_->SetName("tree");
@@ -178,7 +184,7 @@ int main( int argc, char* argv[] ){
     Float_t pmatch = 99.; // added
     Int_t matchedPdgId = 0; // added
     bool hasReco = false; // added
-
+    std::vector<int> v = {22,12,14,16,130,-12,-14,-16,-130};
 
     // init dEdx fit info
     std::pair<std::vector<double>,std::vector<double>> pionmap = get_vminmax("pion");
@@ -196,10 +202,21 @@ int main( int argc, char* argv[] ){
     std::pair<double,double> protonpair_binned;
 
     // go over events
-    std::cout<<HIFtree_->GetEntries();
-    for(int i=0; i<HIFtree_->GetEntries(); i++){
-        HIFtree_->GetEntry(i);
-        ev_.event = i;
+    std::cout<<HIFtree_->GetEntries()<<std::endl;
+    for(int z=0; z<HIFtree_->GetEntries(); z++){
+        HIFtree_->GetEntry(z);
+        HIFtreegen_->GetEntry(z);
+        
+        // fill number of gen particles manually as the field is unknown
+        hifgenev_.gen_ntrk = hifgenev_.gen_trk_pt->size();
+
+
+        //std::cout<<"size info"<<std::endl;
+        //std::cout<<hifev_.ntrk<<std::endl;
+        //std::cout<<hifgenev_.gen_ntrk<<std::endl;
+        //std::cout<<hifgenev_.gen_trk_eta->size();
+
+        ev_.event = z;
         ev_.weight = 1;
         ev_.ntrk = 0;
 
@@ -213,76 +230,76 @@ int main( int argc, char* argv[] ){
           }
 
           // don't fill with garbage
-          if(hifev_.trk_q==0) continue;
-          if(hifev_.trk_eta<-2.5 || hifev_.trk_eta>2.5)
+          if((hifev_.trk_q)->at(j)==0) continue;
+          if((hifev_.trk_eta)->at(j)<-2.5 || (hifev_.trk_eta)->at(j)>2.5) continue;
           
 
           // fill basic track info
-          ev_.trk_p[ev_.ntrk] =  *hifev_.trk_pt[j];
-          ev_.trk_pt[ev_.ntrk] = *hifev_.trk_pt[j] ;
-          ev_.trk_eta[ev_.ntrk] = *hifev_.trk_eta[j] ;
-          ev_.trk_phi[ev_.ntrk] = *hifev_.trk_phi[j] ;
-          ev_.trk_q[ev_.ntrk] = *hifev_.trk_q[j] ;
+          ev_.trk_p[ev_.ntrk] =  hifev_.trk_pt->at(j)*cosh(hifev_.trk_eta->at(j)) ;
+          ev_.trk_pt[ev_.ntrk] = hifev_.trk_pt->at(j) ;
+          ev_.trk_eta[ev_.ntrk] = hifev_.trk_eta->at(j) ;
+          ev_.trk_phi[ev_.ntrk] = hifev_.trk_phi->at(j) ;
+          ev_.trk_q[ev_.ntrk] = hifev_.trk_q->at(j) ;
 
-          ev_.trk_dxy[ev_.ntrk] = *hifev_.trk_dxy[j];
-          ev_.trk_dz[ev_.ntrk] = *hifev_.trk_dz[j];
-          ev_.trk_numberOfPixelHits[ev_.ntrk] = *hifev_.trk_numberOfPixelHits[j];
-          ev_.trk_numberOfHits[ev_.ntrk] = *hifev_.trk_numberOfHits[j];
+          ev_.trk_dxy[ev_.ntrk] = hifev_.trk_dxy->at(j) ;
+          ev_.trk_dz[ev_.ntrk] = hifev_.trk_dz->at(j) ;
+          ev_.trk_numberOfPixelHits[ev_.ntrk] = hifev_.trk_numberOfPixelHits->at(j) ;
+          ev_.trk_numberOfHits[ev_.ntrk] = hifev_.trk_numberOfHits->at(j) ;
 
-          ev_.trk_dedx[ev_.ntrk] = *hifev_.trk_dedx[j];
+          ev_.trk_dedx[ev_.ntrk] = hifev_.trk_dedx->at(j) ;
 
 
 
 
 
           //tight bands
-          if (*hifev_.trk_dedx[j] > pionpair.first.first && *hifev_.trk_dedx[j] < pionpair.first.second){
+          if (hifev_.trk_dedx->at(j) > pionpair.first.first && hifev_.trk_dedx->at(j) < pionpair.first.second){
             ev_.trk_isPi[ev_.ntrk] = 1;
           }
           else{ev_.trk_isPi[ev_.ntrk] = 0;}
 
 
-          if (*hifev_.trk_dedx[j] > kaonpair.first.first && *hifev_.trk_dedx[j] < kaonpair.first.second){
+          if (hifev_.trk_dedx->at(j) > kaonpair.first.first && hifev_.trk_dedx->at(j) < kaonpair.first.second){
             ev_.trk_isK[ev_.ntrk] = 1;
           }
           else{ev_.trk_isK[ev_.ntrk] = 0;}
 
-          if (hifev_.trk_dedx[j] > protonpair.first.first && hifev_.trk_dedx[j] < protonpair.first.second){
+          if (hifev_.trk_dedx->at(j) > protonpair.first.first && hifev_.trk_dedx->at(j) < protonpair.first.second){
             ev_.trk_isP[ev_.ntrk] = 1;
           }
           else{ev_.trk_isP[ev_.ntrk] = 0;}
 
 
           //loose bands
-          if (hifev_.trk_dedx[j] > pionpair.second.first && hifev_.trk_dedx[j] < pionpair.second.second){
+          if (hifev_.trk_dedx->at(j) > pionpair.second.first && hifev_.trk_dedx->at(j) < pionpair.second.second){
             ev_.trk_isPi_loose[ev_.ntrk] = 1;
           }
           else{ev_.trk_isPi_loose[ev_.ntrk] = 0;}
 
 
-          if (hifev_.trk_dedx[j] > kaonpair.second.first && hifev_.trk_dedx[j] < kaonpair.second.second){
+          if (hifev_.trk_dedx->at(j) > kaonpair.second.first && hifev_.trk_dedx->at(j) < kaonpair.second.second){
             ev_.trk_isK_loose[ev_.ntrk] = 1;
           }
           else{ev_.trk_isK_loose[ev_.ntrk] = 0;}
 
-          if (hifev_.trk_dedx[j] > protonpair.second.first && hifev_.trk_dedx[j] < protonpair.second.second){
+          if (hifev_.trk_dedx->at(j) > protonpair.second.first && hifev_.trk_dedx->at(j) < protonpair.second.second){
             ev_.trk_isP_loose[ev_.ntrk] = 1;
           }
           else{ev_.trk_isP_loose[ev_.ntrk] = 0;}
 
 
           //similar output for binned method
-          if (hifev_.trk_dedx[j] > pionpair_binned.first && hifev_.trk_dedx[j] < pionpair_binned.second){
+          if (hifev_.trk_dedx->at(j) > pionpair_binned.first && hifev_.trk_dedx->at(j) < pionpair_binned.second){
             ev_.trk_isPi_binned[ev_.ntrk] = 1;
           }
           else{ev_.trk_isPi_binned[ev_.ntrk] = 0;}
 
-          if (hifev_.trk_dedx[j] > kaonpair_binned.first && hifev_.trk_dedx[j] < kaonpair_binned.second){
+          if (hifev_.trk_dedx->at(j) > kaonpair_binned.first && hifev_.trk_dedx->at(j) < kaonpair_binned.second){
             ev_.trk_isK_binned[ev_.ntrk] = 1;
           }
           else{ev_.trk_isK_binned[ev_.ntrk] = 0;}
 
-          if (hifev_.trk_dedx[j] > protonpair_binned.first && hifev_.trk_dedx[j] < protonpair_binned.second){
+          if (hifev_.trk_dedx->at(j) > protonpair_binned.first && hifev_.trk_dedx->at(j) < protonpair_binned.second){
             ev_.trk_isP_binned[ev_.ntrk] = 1;
           }
           else{ev_.trk_isP_binned[ev_.ntrk] = 0;}
@@ -292,32 +309,30 @@ int main( int argc, char* argv[] ){
           dRmatch = 99.;
           pmatch = 99.;
           matchedPdgId=0;
-          std::vector<int> v = {22,12,14,16,130,-12,-14,-16,-130};
 
           // loop over gen particles
           for (size_t q = 0; q < hifgenev_.gen_ntrk; ++q){
               // exclude photons, neutrinos, kaons
-              if(std::find(v.begin(), v.end(),  hifgenev_.gen_trk_id) != v.end() ) continue;
+              if(std::find(v.begin(), v.end(),  hifgenev_.gen_trk_id->at(q)) != v.end() ) continue;
               // if particle is close
-              if (deltaR(hifgenev_.gen_trk_eta[q], ev_.trk_eta[ev_.ntrk], hifgenev_.gen_trk_phi[q], ev_.trk_phi[ev_.ntrk]) < dRmatch){
+              if (deltaR(hifgenev_.gen_trk_eta->at(q), ev_.trk_eta[ev_.ntrk], hifgenev_.gen_trk_phi->at(q), ev_.trk_phi[ev_.ntrk]) < dRmatch){
                   // if dRmatch is already below a certain value, we should decide based on pt agreement as well
                   if (dRmatch<0.1){
-                    if ( deltaR(hifgenev_.gen_trk_eta[q], ev_.trk_eta[ev_.ntrk], hifgenev_.gen_trk_phi[q], ev_.trk_phi[ev_.ntrk]) + 0.5*std::abs(pf_ref->p() - p.p()) < dRmatch + 0.5*std::abs(pmatch-pf_ref->p()) ){
-                      dRmatch=deltaR(hifgenev_.gen_trk_eta[q], ev_.trk_eta[ev_.ntrk], hifgenev_.gen_trk_phi[q], ev_.trk_phi[ev_.ntrk]);
-                      matchedPdgId=p.pdgId();
-                      pmatch=p.p();
+                    if ( deltaR(hifgenev_.gen_trk_eta->at(q), ev_.trk_eta[ev_.ntrk], hifgenev_.gen_trk_phi->at(q), ev_.trk_phi[ev_.ntrk]) + 0.5*std::abs(hifgenev_.gen_trk_pt->at(q) - ev_.trk_pt[ev_.ntrk]) < dRmatch + 0.5*std::abs(pmatch - ev_.trk_pt[ev_.ntrk]) ){
+                      dRmatch=deltaR(hifgenev_.gen_trk_eta->at(q), ev_.trk_eta[ev_.ntrk], hifgenev_.gen_trk_phi->at(q), ev_.trk_phi[ev_.ntrk]);
+                      matchedPdgId=hifgenev_.gen_trk_id->at(q);
+                      pmatch=hifgenev_.gen_trk_pt->at(q);
                     }
                   }
                   // else just fill
                   else{
-                    dRmatch=deltaR(hifgenev_.gen_trk_eta[q], ev_.trk_eta[ev_.ntrk], hifgenev_.gen_trk_phi[q], ev_.trk_phi[ev_.ntrk]);
-                    matchedPdgId=hifgenev_.gen_trk_id[q];
-                    pmatch=hifgenev_.gen_trk_pt[q];
+                    dRmatch=deltaR(hifgenev_.gen_trk_eta->at(q), ev_.trk_eta[ev_.ntrk], hifgenev_.gen_trk_phi->at(q), ev_.trk_phi[ev_.ntrk]);
+                    matchedPdgId=hifgenev_.gen_trk_id->at(q);
+                    pmatch=hifgenev_.gen_trk_pt->at(q);
               }
             }
           }
           // fill gen matching info
-          std::cout<<matchedPdgId;
           ev_.trk_matchedPdgId[ev_.ntrk] = matchedPdgId;
           ev_.trk_dRmatch[ev_.ntrk] = dRmatch;
           ev_.trk_genPt[ev_.ntrk] = pmatch;
@@ -326,7 +341,61 @@ int main( int argc, char* argv[] ){
           ev_.ntrk++;
           
         }
-    }
+     
 
+    // GEN particles: general info and tracking efficiency info
+          ev_.gen_ntrk = 0;
+         
+          for (int i=0; i<hifgenev_.gen_ntrk; i++){ 
+          // check that the total number of reco tracks does not exceed the MAXGENTRACKS
+          if(ev_.MAXGENTRACKS==ev_.gen_ntrk){
+            std::cout << "ERROR: number of reconstructed tracks reach the maximum of MAXGENTRACKS =  "<<ev_.MAXGENTRACKS<<", the gen_ntrk loop is terminated"<<std::endl;
+            std::cout <<"\t\t... consider increasing MAXGENTRACKS !!!"<<std::endl;
+            break;
+          }
+
+          
+
+          if(hifgenev_.gen_trk_eta->at(i)<-2.5 || hifgenev_.gen_trk_eta->at(i)>2.5) continue;
+
+
+          if(hifgenev_.gen_trk_charge->at(i) == 0) continue;
+          if(std::find(v.begin(), v.end(),  hifgenev_.gen_trk_id->at(i)) != v.end() ) continue;
+
+          // write gen info
+          ev_.gen_trk_pt[ev_.gen_ntrk] = hifgenev_.gen_trk_pt->at(i);
+          ev_.gen_trk_p[ev_.gen_ntrk] = hifgenev_.gen_trk_pt->at(i)*cosh(hifgenev_.gen_trk_eta->at(i));
+          ev_.gen_trk_E[ev_.gen_ntrk] = 0.;
+          ev_.gen_trk_eta[ev_.gen_ntrk] = hifgenev_.gen_trk_eta->at(i);
+          ev_.gen_trk_phi[ev_.gen_ntrk] = hifgenev_.gen_trk_phi->at(i);
+          ev_.gen_trk_id[ev_.gen_ntrk] = hifgenev_.gen_trk_id->at(i);
+
+          hasReco = false;
+          // check if track matches
+          for(int h=0; h<hifev_.ntrk; h++){
+                if (deltaR(ev_.gen_trk_eta[ev_.gen_ntrk],hifev_.trk_eta->at(h) ,ev_.gen_trk_phi[ev_.gen_ntrk],hifev_.trk_phi->at(h)) < 0.1){
+                        hasReco = true;
+                        continue;
+                        }
+                }
+          if (hasReco){ ev_.gen_trk_hasReco[ev_.gen_ntrk] = 1;}
+          else{ ev_.gen_trk_hasReco[ev_.gen_ntrk] = 0;}
+    
+      ev_.gen_ntrk++;
+
+      }        //end of gen loop
+
+      tree_->Fill();
+    }        //end of event loop
+
+    //write everything in the output file
+
+    dir->cd();
+
+    tree_->SetName("tree");
+    tree_->Write();
+
+    of.Close();
+    
     std::cerr << "###done###" << std::endl;
 }

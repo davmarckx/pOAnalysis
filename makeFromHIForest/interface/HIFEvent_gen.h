@@ -16,9 +16,9 @@ struct HIFEventgen_t
 
   //gen track info
   Float_t gen_ntrk;
-  Int_t gen_trk_charge[MAXGENTRACKS];
-  std::vector<float> *gen_trk_pt[MAXGENTRACKS], *gen_trk_phi[MAXGENTRACKS], *gen_trk_eta[MAXGENTRACKS];
-  Int_t gen_trk_id[MAXGENTRACKS];
+  std::vector<char> *gen_trk_charge;
+  std::vector<float> *gen_trk_pt, *gen_trk_phi, *gen_trk_eta;
+  std::vector<int> *gen_trk_id;
   
   
   // Gen info

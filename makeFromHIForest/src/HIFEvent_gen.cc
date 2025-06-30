@@ -13,10 +13,10 @@ void attachToHIFEventTree_gen(TTree *t,HIFEventgen_t &ev)
   //t->SetBranchAddress("typevt",    &ev.typevt);
   
   t->SetBranchAddress("npart",        &ev.gen_ntrk);
-  t->SetBranchAddress("pt", ev.gen_trk_pt);
-  t->SetBranchAddress("chg",     ev.gen_trk_charge);
-  t->SetBranchAddress("phi",     ev.gen_trk_phi);
-  t->SetBranchAddress("eta",     ev.gen_trk_eta);
-  t->SetBranchAddress("pdg", ev.gen_trk_id);
+  t->SetBranchAddress("pt", &ev.gen_trk_pt);
+  t->SetBranchAddress("chg",     &ev.gen_trk_charge);
+  t->SetBranchAddress("phi",     &ev.gen_trk_phi);
+  t->SetBranchAddress("eta",     &ev.gen_trk_eta);
+  t->SetBranchAddress("pdg", &ev.gen_trk_id);
 }
 

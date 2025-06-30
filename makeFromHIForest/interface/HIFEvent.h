@@ -26,10 +26,22 @@ struct HIFEvent_t
   Int_t ntrk;
 
   //track info
-  std::vector<int> *trk_nMeasure[MAXTRACKS], *trk_nSaturMeasure[MAXTRACKS], *trk_nMeasureLayer[MAXTRACKS], *trk_numberOfPixelHits[MAXTRACKS], *trk_numberOfHits[MAXTRACKS];
-  std::vector<int> *trk_q[MAXTRACKS];
-  std::vector<float> *trk_dxy[MAXTRACKS], *trk_dz[MAXTRACKS];
-  std::vector<float> *trk_pt_error[MAXTRACKS], *trk_pt[MAXTRACKS], *trk_eta[MAXTRACKS], *trk_phi[MAXTRACKS], *trk_dedx[MAXTRACKS];
+  std::vector<int> *trk_nMeasure;
+  std::vector<int> *trk_nSaturMeasure;
+  std::vector<int> *trk_nMeasureLayer;
+  std::vector<int> *trk_numberOfPixelHits; 
+  std::vector<int> *trk_numberOfHits;
+
+  std::vector<int> *trk_q;
+
+
+  std::vector<float> *trk_dxy;
+  std::vector<float> *trk_dz;
+  std::vector<float> *trk_pt_error;
+  std::vector<float> *trk_pt;
+  std::vector<float> *trk_eta;
+  std::vector<float> *trk_phi;
+  std::vector<float> *trk_dedx;
 
   // Gen info
   Int_t typevt;
