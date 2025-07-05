@@ -28,9 +28,12 @@ void createMiniEventTree(TTree *t,MiniEvent_t &ev)
   t->Branch("trk_isPi",       ev.trk_isPi,        "trk_isPi[ntrk]/I");
   t->Branch("trk_isK",       ev.trk_isK,        "trk_isK[ntrk]/I");
   t->Branch("trk_isP",       ev.trk_isP,        "trk_isP[ntrk]/I");
+  t->Branch("trk_isD",       ev.trk_isD,        "trk_isD[ntrk]/I");
+
   t->Branch("trk_isPi_loose",       ev.trk_isPi_loose,        "trk_isPi_loose[ntrk]/I");
   t->Branch("trk_isK_loose",       ev.trk_isK_loose,        "trk_isK_loose[ntrk]/I");
   t->Branch("trk_isP_loose",       ev.trk_isP_loose,        "trk_isP_loose[ntrk]/I");
+  t->Branch("trk_isD_loose",       ev.trk_isD_loose,        "trk_isD_loose[ntrk]/I");
   t->Branch("trk_isPi_binned",       ev.trk_isPi_binned,        "trk_isPi_binned[ntrk]/I");
   t->Branch("trk_isK_binned",       ev.trk_isK_binned,        "trk_isK_binned[ntrk]/I");
   t->Branch("trk_isP_binned",       ev.trk_isP_binned,        "trk_isP_binned[ntrk]/I");
@@ -42,6 +45,7 @@ void createMiniEventTree(TTree *t,MiniEvent_t &ev)
   t->Branch("trk_numberOfHits",  ev.trk_numberOfHits,  "trk_numberOfHits[ntrk]/I");
 
   t->Branch("gen_ntrk",        &ev.gen_ntrk,          "gen_ntrk/I");
+  t->Branch("gen_nD",        &ev.gen_nD,          "gen_nD/I");
   t->Branch("gen_trk_pt",        ev.gen_trk_pt,         "gen_trk_pt[gen_ntrk]/F");
   t->Branch("gen_trk_p",        ev.gen_trk_p,         "gen_trk_p[gen_ntrk]/F");
   t->Branch("gen_trk_E",        ev.gen_trk_E,         "gen_trk_E[gen_ntrk]/F");
@@ -78,6 +82,8 @@ void attachToMiniEventTree(TTree *t,MiniEvent_t &ev)
   t->SetBranchAddress("trk_isPi",       ev.trk_isPi);
   t->SetBranchAddress("trk_isK",       ev.trk_isK);
   t->SetBranchAddress("trk_isP",       ev.trk_isP);
+  t->SetBranchAddress("trk_isD",       ev.trk_isD);
+
   t->SetBranchAddress("trk_isPi_loose",       ev.trk_isPi_loose);
   t->SetBranchAddress("trk_isK_loose",       ev.trk_isK_loose);
   t->SetBranchAddress("trk_isP_loose",       ev.trk_isP_loose);
@@ -93,6 +99,7 @@ void attachToMiniEventTree(TTree *t,MiniEvent_t &ev)
   t->SetBranchAddress("trk_numberOfHits",      ev.trk_numberOfHits);
 
   t->SetBranchAddress("gen_ntrk",        &ev.gen_ntrk);
+  t->SetBranchAddress("gen_nD",        &ev.gen_nD);
   t->SetBranchAddress("gen_trk_pt", ev.gen_trk_pt);
   t->SetBranchAddress("gen_trk_p", ev.gen_trk_p);
   t->SetBranchAddress("gen_trk_E", ev.gen_trk_E);

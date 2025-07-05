@@ -4,6 +4,7 @@
 
 #include "TTree.h"
 #include "TFile.h"
+#include "TChain.h"
 #include "TDirectory.h"
 
 #include "TH1.h"
@@ -46,7 +47,7 @@ std::pair<std::vector<double>,std::vector<double>> get_vminmax(std::string pID){
     vmax = {90.0,90.0,90.0,90.0,90.0,90.0,90.0,90.0,90.0,90.0,90.0,90.0,90.0,80.0,70.0, 60.0, 32.0, 30.1, 29.071761734008692, 25.67537796020506, 26.126737060546873, 24.528037109375017, 20.346788101196278, 19.78708869934082, 17.967738342285152, 17.33329048156739, 16.45245220184327, 15.577755470275878, 13.693615837097168, 13.060929775238037, 12.624228782653804, 11.116469459533665, 9.901309490203857, 9.222109413146985, 9.258628196716307, 7.782722043991086, 8.251549339294431, 7.5790978622436525, 7.035638093948365, 7.280358648300174, 6.795026702880858, 6.458363580703735, 6.0845237064361575, 6.074124050140381, 5.909504861831662, 5.727134132385251, 5.6849892902374295, 5.340808343887328, 5.431743965148925, 5.417793769836424, 5.028053817749024, 5.043228044509887, 4.969036979675293, 4.816554069519044, 4.828817377090454, 4.755254526138307, 4.525655822753905, 4.636913070678706, 4.52254383087158, 4.341978054046631, 4.3118659782409665, 4.180289030075073, 4.232295989990234, 4.259139099121095, 4.235232610702511, 4.195414686203, 4.074352703094482, 4.0283683395385745, 4.002374544143676, 3.9587430906295777, 4.132192325592041, 3.85005774974823, 3.928359794616698, 3.93667248249054, 3.7298201274871827, 3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827,3.7298201274871827};
   }
   else{
-    std::cerr<<"pID not recognized in dE/dx fit.";
+    std::cerr<<"pID not recognized in binned dE/dx fit.";
   }
   return std::make_pair(vmin,vmax);
 }
@@ -112,6 +113,22 @@ std::pair<std::pair<double,double>,std::pair<double,double>> get_minmax(double p
     min_l = std::min(81.,min_l);
     max_l = std::min(151.,max_l);
   }
+ else if (flavor=="deuterion"){
+    double maxpr = fit_extended(pval,-2.40236732e+03, -1.08477323e+05,  2.49771514e+04, -2.63751597e+03,-4.83004264e+04,  1.76347258e+00 , 2.46524720e+03, -8.06810115e+00,3.07529625e+00);
+    min = -0.1+fit_extended(pval,-5.18251880e+04,  6.00143418e+04,  1.89169865e+03, -6.36742783e+02,1.53154564e+03,  3.36913031e+00,  4.23613847e+00,  1.92057065e+02,-1.56391160e+01);
+    max = 0.1+fit_extended(pval,1.80313156e+03,  6.67481452e+03, -2.94162671e+03,  2.61371955e+02, 6.01056572e+03,  4.28953682e+00,  8.35549262e+00,  6.95408925e+00, 3.73133240e+00);
+
+    min = std::min(82.,min);
+    min = std::max(maxpr+0.1,min);
+    max = std::min(150.,max);
+
+    min_l = -0.1+fit_extended(pval+0.1, -5.18251880e+04,  5.98043418e+04,  1.89169865e+03, -6.36742783e+02-0.1,1.53154564e+03,  3.36913031e+00,  4.23613847e+00,  1.92057065e+02,-1.56391160e+01);
+    max_l = 0.1+fit_extended(pval-0.1, 1.80313156e+03,  6.67481452e+03, -2.94162671e+03,  2.61371955e+02+1.5, 6.01056572e+03,  4.28953682e+00,  8.35549262e+00,  6.95408925e+00, 3.73133240e+00);
+
+    min_l = std::min(81.,min_l);
+    min_l = std::max(maxpr,min_l);
+    max_l = std::min(151.,max_l);
+  }
   return  std::make_pair(std::make_pair(min,max),std::make_pair(min_l,max_l));
 }
 
@@ -142,7 +159,8 @@ int main( int argc, char* argv[] ){
 
 
     // make output tree
-    std::string outputfile = "/user/dmarckx/PO/CMSSW_15_0_0_pre2/src/pOAnalysis/OUTPUT/output_" + outputname +".root";
+    //std::string outputfile = "/eos/user/d/dmarckx/PO/CMSSW_15_0_0_pre2/src/pOAnalysis/OUTPUT/output_" + outputname +".root";
+    std::string outputfile = "/pnfs/iihe/cms/store/user/dmarckx/pO_miniAOD/MiniEvent/output_" + outputname +"_withD.root";
 
     TFile of(outputfile.c_str(), "recreate");
     TDirectory *dir = of.mkdir("analysis");
@@ -157,18 +175,24 @@ int main( int argc, char* argv[] ){
     
     
     // make HIForest tree
-    TFile f(inputfile.c_str(), "read");
+    //TFile f(inputfile.c_str(), "read");
 
-    std::cout<<"opened file"<<std::endl;
+    std::cout<<"opening file "<< inputfile <<std::endl;
 
 
     HIFEvent_t hifev_;
     HIFEventgen_t hifgenev_;
 
-    TTree *HIFtree_ = f.Get<TTree>("PbPbTracks/trackTree");
-    //HIFtree_->SetDirectory(0);
-    TTree *HIFtreegen_ = f.Get<TTree>("HiGenParticleAna/hi");
-    //HIFtreegen_->SetDirectory(0);
+    //TTree *HIFtree_ = f.Get<TTree>("PbPbTracks/trackTree");
+    //TTree *HIFtreegen_ = f.Get<TTree>("HiGenParticleAna/hi");
+    TChain *HIFtree_ = new TChain("PbPbTracks/trackTree");
+    TChain *HIFtreegen_ = new TChain("HiGenParticleAna/hi");
+
+    const std::string& recotree = "*";
+    const std::string& gentree = "*";
+
+    HIFtree_->Add((inputfile).c_str());
+    HIFtreegen_->Add((inputfile).c_str());
 
     attachToHIFEventTree(HIFtree_,hifev_);
     attachToHIFEventTree_gen(HIFtreegen_,hifgenev_); 
@@ -184,7 +208,7 @@ int main( int argc, char* argv[] ){
     Float_t pmatch = 99.; // added
     Int_t matchedPdgId = 0; // added
     bool hasReco = false; // added
-    std::vector<int> v = {22,12,14,16,130,-12,-14,-16,-130};
+    std::vector<int> v = {22,12,14,16,130,-12,-14,-16,-130}; // skip PiDs that do not leave tracks (photons, neutrinos, K0's)
 
     // init dEdx fit info
     std::pair<std::vector<double>,std::vector<double>> pionmap = get_vminmax("pion");
@@ -195,6 +219,7 @@ int main( int argc, char* argv[] ){
     std::pair<std::pair<double,double>,std::pair<double,double>> pionpair;
     std::pair<std::pair<double,double>,std::pair<double,double>> kaonpair;
     std::pair<std::pair<double,double>,std::pair<double,double>> protonpair;
+    std::pair<std::pair<double,double>,std::pair<double,double>> deuterionpair;
 
     // binned method (worse performance overall)
     std::pair<double,double> pionpair_binned;
@@ -203,6 +228,8 @@ int main( int argc, char* argv[] ){
 
     // go over events
     std::cout<<HIFtree_->GetEntries()<<std::endl;
+    std::cout<<HIFtreegen_->GetEntries()<<std::endl;
+
     for(int z=0; z<HIFtree_->GetEntries(); z++){
         HIFtree_->GetEntry(z);
         HIFtreegen_->GetEntry(z);
@@ -211,15 +238,10 @@ int main( int argc, char* argv[] ){
         hifgenev_.gen_ntrk = hifgenev_.gen_trk_pt->size();
 
 
-        //std::cout<<"size info"<<std::endl;
-        //std::cout<<hifev_.ntrk<<std::endl;
-        //std::cout<<hifgenev_.gen_ntrk<<std::endl;
-        //std::cout<<hifgenev_.gen_trk_eta->size();
-
         ev_.event = z;
         ev_.weight = 1;
         ev_.ntrk = 0;
-
+        
         // loop over pf candidates
         for(int j=0; j<hifev_.ntrk; j++){
           // stop computation if maxtracks limit is hit
@@ -230,9 +252,7 @@ int main( int argc, char* argv[] ){
           }
 
           // don't fill with garbage
-          if((hifev_.trk_q)->at(j)==0) continue;
           if((hifev_.trk_eta)->at(j)<-2.5 || (hifev_.trk_eta)->at(j)>2.5) continue;
-          
 
           // fill basic track info
           ev_.trk_p[ev_.ntrk] =  hifev_.trk_pt->at(j)*cosh(hifev_.trk_eta->at(j)) ;
@@ -240,6 +260,7 @@ int main( int argc, char* argv[] ){
           ev_.trk_eta[ev_.ntrk] = hifev_.trk_eta->at(j) ;
           ev_.trk_phi[ev_.ntrk] = hifev_.trk_phi->at(j) ;
           ev_.trk_q[ev_.ntrk] = hifev_.trk_q->at(j) ;
+
 
           ev_.trk_dxy[ev_.ntrk] = hifev_.trk_dxy->at(j) ;
           ev_.trk_dz[ev_.ntrk] = hifev_.trk_dz->at(j) ;
@@ -249,6 +270,15 @@ int main( int argc, char* argv[] ){
           ev_.trk_dedx[ev_.ntrk] = hifev_.trk_dedx->at(j) ;
 
 
+          // fill dE/dx band matching info, returns the tight and loose bands in 1 object
+          pionpair = get_minmax(ev_.trk_p[ev_.ntrk],"pion");
+          kaonpair = get_minmax(ev_.trk_p[ev_.ntrk],"kaon");
+          protonpair = get_minmax(ev_.trk_p[ev_.ntrk],"proton");
+          deuterionpair = get_minmax(ev_.trk_p[ev_.ntrk],"deuterion");
+
+          pionpair_binned = get_minmax_binned(ev_.trk_p[ev_.ntrk],pionmap);
+          kaonpair_binned = get_minmax_binned(ev_.trk_p[ev_.ntrk],kaonmap);
+          protonpair_binned = get_minmax_binned(ev_.trk_p[ev_.ntrk],protonmap);
 
 
 
@@ -269,6 +299,11 @@ int main( int argc, char* argv[] ){
           }
           else{ev_.trk_isP[ev_.ntrk] = 0;}
 
+          if (hifev_.trk_dedx->at(j) > deuterionpair.first.first && hifev_.trk_dedx->at(j) < deuterionpair.first.second){
+            ev_.trk_isD[ev_.ntrk] = 1;
+          }
+          else{ev_.trk_isD[ev_.ntrk] = 0;}
+
 
           //loose bands
           if (hifev_.trk_dedx->at(j) > pionpair.second.first && hifev_.trk_dedx->at(j) < pionpair.second.second){
@@ -286,6 +321,11 @@ int main( int argc, char* argv[] ){
             ev_.trk_isP_loose[ev_.ntrk] = 1;
           }
           else{ev_.trk_isP_loose[ev_.ntrk] = 0;}
+
+          if (hifev_.trk_dedx->at(j) > deuterionpair.second.first && hifev_.trk_dedx->at(j) < deuterionpair.second.second){
+            ev_.trk_isD_loose[ev_.ntrk] = 1;
+          }
+          else{ev_.trk_isD_loose[ev_.ntrk] = 0;}
 
 
           //similar output for binned method
@@ -337,7 +377,7 @@ int main( int argc, char* argv[] ){
           ev_.trk_dRmatch[ev_.ntrk] = dRmatch;
           ev_.trk_genPt[ev_.ntrk] = pmatch;
 
-
+          // only write protons and deuterium 
           ev_.ntrk++;
           
         }
@@ -345,6 +385,7 @@ int main( int argc, char* argv[] ){
 
     // GEN particles: general info and tracking efficiency info
           ev_.gen_ntrk = 0;
+          ev_.gen_nD = 0;
          
           for (int i=0; i<hifgenev_.gen_ntrk; i++){ 
           // check that the total number of reco tracks does not exceed the MAXGENTRACKS
@@ -354,14 +395,12 @@ int main( int argc, char* argv[] ){
             break;
           }
 
-          
-
           if(hifgenev_.gen_trk_eta->at(i)<-2.5 || hifgenev_.gen_trk_eta->at(i)>2.5) continue;
-
 
           if(hifgenev_.gen_trk_charge->at(i) == 0) continue;
           if(std::find(v.begin(), v.end(),  hifgenev_.gen_trk_id->at(i)) != v.end() ) continue;
 
+          ev_.gen_nD++;
           // write gen info
           ev_.gen_trk_pt[ev_.gen_ntrk] = hifgenev_.gen_trk_pt->at(i);
           ev_.gen_trk_p[ev_.gen_ntrk] = hifgenev_.gen_trk_pt->at(i)*cosh(hifgenev_.gen_trk_eta->at(i));
@@ -383,7 +422,7 @@ int main( int argc, char* argv[] ){
     
       ev_.gen_ntrk++;
 
-      }        //end of gen loop
+      }   //end of gen loop
 
       tree_->Fill();
     }        //end of event loop

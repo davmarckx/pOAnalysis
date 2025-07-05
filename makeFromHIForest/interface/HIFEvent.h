@@ -32,7 +32,7 @@ struct HIFEvent_t
   std::vector<int> *trk_numberOfPixelHits; 
   std::vector<int> *trk_numberOfHits;
 
-  std::vector<int> *trk_q;
+  std::vector<char> *trk_q;
 
 
   std::vector<float> *trk_dxy;

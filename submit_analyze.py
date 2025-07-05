@@ -225,7 +225,7 @@ def makeJobDescription(name, exe, argstring=None,
 #settings for each year, found with gridsearch
 input_dir = sys.argv[1].rstrip('/')
 
-runmode = "local"
+runmode = "condor"
 
 fromHIForest = True
 
@@ -253,24 +253,22 @@ if not fromHIForest:
           os.system("rm OUTPUT/output_{}".format(input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1] + str(i)))
 
 else:
-    for i, file in enumerate(files):
-        print(file)
-        cmd = "./makeFromHIForest/fillMiniEvent {} {}".format(file, input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1] + "_HIF" + str(i))
+    for i in range(4):
+      for j in range(10):
+        filename = files[0].replace(".root","")[:-4]
+        cmd = "python3 analyze.py {} {}".format(filename+str(i)+str(j), input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1] + "_HIF" + str(i)+str(j))
+
         cmds.append(cmd)
-
-        if os.path.exists("OUTPUT/output_{}".format(input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1] + "_HIF" + str(i))):
-          os.system("rm OUTPUT/output_{}".format(input_dir.split("/")[-1].split("_")[-2] + "_"+input_dir.split("/")[-1].split("_")[-1] + "_HIF" + str(i)))
-
 
 if runmode == "local":
   for cmd in cmds:
     print(cmd)
-    os.system(cmd)
+    #os.system(cmd)
 
 else:
   submitCommandsAsCondorCluster('cjob_analyse', cmds, stdout=None, stderr=None, log=None,
-                        cpus=1, mem=2048, disk=10240,
+                        cpus=1, mem=4096, disk=10240,
                         home=None,
                         proxy=None,
-                        cmssw_version="~/PO/CMSSW_15_0_0_pre2",
+                        cmssw_version="PO/CMSSW_15_0_0_pre2",
                         jobflavour=None)
